@@ -9,32 +9,35 @@
 <body>
     <div id="map" style="height: 100vh;"></div>
     <script>
-        // Fonction pour récupérer les paramètres de l'URL
-        function getQueryParams() {
-            const params = new URLSearchParams(window.location.search);
-            return {
-                lat: parseFloat(params.get('lat')) || 52.1307, // Latitude par défaut : Pays de Galles
-                lon: parseFloat(params.get('lon')) || -3.7837, // Longitude par défaut
-                zoom: parseInt(params.get('zoom')) || 8 // Zoom par défaut
-            };
-        }
-
-        // Récupérer les paramètres de l'URL
-        const queryParams = getQueryParams();
-
         // Initialiser la carte
-        var map = L.map('map').setView([queryParams.lat, queryParams.lon], queryParams.zoom);
-
-        // Ajouter une couche OpenStreetMap
+        var map = L.map('map').setView([52.1307, -3.7837], 8); // Centre par défaut : Pays de Galles
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        // Ajouter un marqueur si les coordonnées sont spécifiées
-        if (queryParams.lat && queryParams.lon) {
-            L.marker([queryParams.lat, queryParams.lon]).addTo(map)
-                .bindPopup('Vous êtes ici !').openPopup();
+        // Fonction pour ajouter ou déplacer un marqueur
+        var marker = null;
+        function updateMarker(lat, lon) {
+            if (marker) {
+                // Déplace le marqueur existant
+                marker.setLatLng([lat, lon]);
+            } else {
+                // Ajoute un nouveau marqueur
+                marker = L.marker([lat, lon]).addTo(map)
+                    .bindPopup('Nouvelle position')
+                    .openPopup();
+            }
+            // Centre la carte sur le nouveau point
+            map.setView([lat, lon], 12);
         }
+
+        // Écoute les messages envoyés par FlutterFlow
+        window.addEventListener('message', (event) => {
+            const data = event.data;
+            if (data && data.lat && data.lon) {
+                updateMarker(data.lat, data.lon);
+            }
+        });
     </script>
 </body>
 </html>
