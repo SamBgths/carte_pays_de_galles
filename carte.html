@@ -13,28 +13,25 @@
         function getQueryParams() {
             const params = new URLSearchParams(window.location.search);
             return {
-                lat: parseFloat(params.get('lat')) || 52.1307, // Latitude par défaut
-                lon: parseFloat(params.get('lon')) || -3.7837, // Longitude par défaut
-                zoom: parseInt(params.get('zoom')) || 8        // Zoom par défaut
+                lat: parseFloat(params.get('lat')) || 52.1307,
+                lon: parseFloat(params.get('lon')) || -3.7837,
+                zoom: parseInt(params.get('zoom')) || 8
             };
         }
 
-        // Initialiser la carte avec les coordonnées de l'URL
+        // Initialiser la carte
         const queryParams = getQueryParams();
         var map = L.map('map').setView([queryParams.lat, queryParams.lon], queryParams.zoom);
 
-        // Ajouter la couche OpenStreetMap
+        // Ajouter une couche OpenStreetMap
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        // Ajouter un marqueur si les coordonnées sont présentes
+        // Ajouter un marqueur sur les coordonnées
         L.marker([queryParams.lat, queryParams.lon]).addTo(map)
             .bindPopup('Position actuelle')
             .openPopup();
-
-        // Centrer la carte si un marqueur est ajouté
-        map.setView([queryParams.lat, queryParams.lon], queryParams.zoom);
     </script>
 </body>
 </html>
