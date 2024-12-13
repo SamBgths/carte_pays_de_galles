@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Carte OpenStreetMap - Pays de Galles</title>
+    <title>Carte OpenStreetMap</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -9,35 +9,32 @@
 <body>
     <div id="map" style="height: 100vh;"></div>
     <script>
-        // Initialiser la carte
-        var map = L.map('map').setView([52.1307, -3.7837], 8); // Centre par défaut : Pays de Galles
+        // Récupérer les paramètres de l'URL
+        function getQueryParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                lat: parseFloat(params.get('lat')) || 52.1307, // Latitude par défaut
+                lon: parseFloat(params.get('lon')) || -3.7837, // Longitude par défaut
+                zoom: parseInt(params.get('zoom')) || 8        // Zoom par défaut
+            };
+        }
+
+        // Initialiser la carte avec les coordonnées de l'URL
+        const queryParams = getQueryParams();
+        var map = L.map('map').setView([queryParams.lat, queryParams.lon], queryParams.zoom);
+
+        // Ajouter la couche OpenStreetMap
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        // Fonction pour ajouter ou déplacer un marqueur
-        var marker = null;
-        function updateMarker(lat, lon) {
-            if (marker) {
-                // Déplace le marqueur existant
-                marker.setLatLng([lat, lon]);
-            } else {
-                // Ajoute un nouveau marqueur
-                marker = L.marker([lat, lon]).addTo(map)
-                    .bindPopup('Nouvelle position')
-                    .openPopup();
-            }
-            // Centre la carte sur le nouveau point
-            map.setView([lat, lon], 12);
-        }
+        // Ajouter un marqueur si les coordonnées sont présentes
+        L.marker([queryParams.lat, queryParams.lon]).addTo(map)
+            .bindPopup('Position actuelle')
+            .openPopup();
 
-        // Écoute les messages envoyés par FlutterFlow
-        window.addEventListener('message', (event) => {
-            const data = event.data;
-            if (data && data.lat && data.lon) {
-                updateMarker(data.lat, data.lon);
-            }
-        });
+        // Centrer la carte si un marqueur est ajouté
+        map.setView([queryParams.lat, queryParams.lon], queryParams.zoom);
     </script>
 </body>
 </html>
