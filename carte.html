@@ -9,19 +9,24 @@
 <body>
     <div id="map" style="height: 100vh;"></div>
     <script>
-        // Récupérer les paramètres de l'URL
+        // Définir les valeurs par défaut pour la carte
+        const defaultLat = 52.1307; // Latitude par défaut
+        const defaultLon = -3.7837; // Longitude par défaut
+        const defaultZoom = 8; // Zoom par défaut
+
+        // Fonction pour récupérer les paramètres de l'URL
         function getQueryParams() {
             const params = new URLSearchParams(window.location.search);
             return {
-                lat: parseFloat(params.get('lat')) || 52.1307,
-                lon: parseFloat(params.get('lon')) || -3.7837,
-                zoom: parseInt(params.get('zoom')) || 8
+                lat: parseFloat(params.get('lat')) || defaultLat,
+                lon: parseFloat(params.get('lon')) || defaultLon,
+                zoom: parseInt(params.get('zoom')) || defaultZoom
             };
         }
 
-        // Initialiser la carte
+        // Initialiser la carte avec les paramètres d'URL ou par défaut
         const queryParams = getQueryParams();
-        var map = L.map('map').setView([queryParams.lat, queryParams.lon], queryParams.zoom);
+        const map = L.map('map').setView([queryParams.lat, queryParams.lon], queryParams.zoom);
 
         // Ajouter une couche OpenStreetMap
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -31,25 +36,35 @@
         // Ajouter un marqueur initial
         let marker = L.marker([queryParams.lat, queryParams.lon]).addTo(map);
 
-        // Fonction pour mettre à jour la vue et le marqueur
+        // Fonction pour mettre à jour dynamiquement la vue et le marqueur
         function updateMap(lat, lon, zoom) {
-            // Mettre à jour la vue de la carte
-            map.setView([lat, lon], zoom);
-
-            // Mettre à jour la position du marqueur
-            marker.setLatLng([lat, lon]);
+            map.setView([lat, lon], zoom); // Met à jour la vue de la carte
+            marker.setLatLng([lat, lon]); // Déplace le marqueur
         }
 
-        // Écouter les changements dans l'URL
+        // Fonction pour mettre à jour l'URL sans recharger la page
+        function updateUrl(lat, lon, zoom) {
+            const newUrl = `?lat=${lat}&lon=${lon}&zoom=${zoom}`;
+            history.pushState({}, '', newUrl); // Change l'URL
+        }
+
+        // Fonction combinée pour mettre à jour la carte et l'URL
+        function updateMapAndUrl(lat, lon, zoom) {
+            updateMap(lat, lon, zoom); // Met à jour la carte
+            updateUrl(lat, lon, zoom); // Met à jour l'URL
+        }
+
+        // Ajouter une méthode globale pour une communication externe (ex. depuis FlutterFlow)
+        window.updateMapFromFlutter = function(lat, lon, zoom) {
+            updateMapAndUrl(lat, lon, zoom);
+        };
+
+        // Écouter les événements "popstate" pour les changements d'URL (boutons "Précédent/Suivant" du navigateur)
         window.addEventListener('popstate', () => {
             const updatedParams = getQueryParams();
             updateMap(updatedParams.lat, updatedParams.lon, updatedParams.zoom);
         });
 
-        // Ajouter une méthode globale pour une communication facile avec FlutterFlow
-        window.updateMapFromFlutter = function(lat, lon, zoom) {
-            updateMap(lat, lon, zoom);
-        };
     </script>
 </body>
 </html>
