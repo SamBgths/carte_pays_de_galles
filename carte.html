@@ -28,9 +28,28 @@
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        // Ajouter un marqueur
-        L.marker([queryParams.lat, queryParams.lon]).addTo(map)
-            .openPopup();
+        // Ajouter un marqueur initial
+        let marker = L.marker([queryParams.lat, queryParams.lon]).addTo(map);
+
+        // Fonction pour mettre à jour la vue et le marqueur
+        function updateMap(lat, lon, zoom) {
+            // Mettre à jour la vue de la carte
+            map.setView([lat, lon], zoom);
+
+            // Mettre à jour la position du marqueur
+            marker.setLatLng([lat, lon]);
+        }
+
+        // Écouter les changements dans l'URL
+        window.addEventListener('popstate', () => {
+            const updatedParams = getQueryParams();
+            updateMap(updatedParams.lat, updatedParams.lon, updatedParams.zoom);
+        });
+
+        // Ajouter une méthode globale pour une communication facile avec FlutterFlow
+        window.updateMapFromFlutter = function(lat, lon, zoom) {
+            updateMap(lat, lon, zoom);
+        };
     </script>
 </body>
 </html>
